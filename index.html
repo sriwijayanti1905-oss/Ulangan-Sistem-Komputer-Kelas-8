@@ -853,14 +853,37 @@
     }
 
     // ================= SISTEM ANTI-CHEAT =================
-    document.addEventListener("visibilitychange", () => {
-        if (document.hidden && isExamActive) {
-            fraudCount++;
-            document.getElementById("fraudCountBadge").textContent = `Terdeteksi Curang: ${fraudCount} Kali`;
-            document.getElementById("cheatWarningCounterText").textContent = `Total Pelanggaran: ${fraudCount} Kali`;
-            document.getElementById("antiCheatModal").classList.remove("hidden");
-        }
-    });
+function blockEvent(e) {
+    if (isExamActive) {
+        e.preventDefault();
+        return false;
+    }
+}
+
+function setupAntiCheatingListeners() {
+    document.addEventListener("copy", blockEvent);
+    document.addEventListener("paste", blockEvent);
+    document.addEventListener("cut", blockEvent);
+    document.addEventListener("contextmenu", blockEvent);
+
+    window.onblur = function () {
+        if (!isExamActive) return;
+
+        fraudCount++;
+        document.getElementById("fraudCountBadge").textContent = `Terdeteksi Curang: ${fraudCount} Kali`;
+        document.getElementById("cheatWarningCounterText").textContent = `Total Pelanggaran: ${fraudCount} Kali`;
+        document.getElementById("antiCheatModal").classList.remove("hidden");
+    };
+}
+
+function removeAntiCheatingListeners() {
+    document.removeEventListener("copy", blockEvent);
+    document.removeEventListener("paste", blockEvent);
+    document.removeEventListener("cut", blockEvent);
+    document.removeEventListener("contextmenu", blockEvent);
+    window.onblur = null;
+}
+    );
 
     function dismissAntiCheatModal() {
         document.getElementById("antiCheatModal").classList.add("hidden");
@@ -895,6 +918,9 @@
 
         startGlobalTimer();
         renderCurrentQuestion();
+            setupAntiCheatingListeners();
+    startGlobalTimer();
+    renderCurrentQuestion();
     }
 
     function startGlobalTimer() {
